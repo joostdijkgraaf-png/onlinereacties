@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reacties</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Flama', Arial, sans-serif;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .feed {
+    max-width: 420px;
+    width: 100%;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #D10A10;
+  }
+
+  .header .icon { font-size: 20px; }
+
+  .header h2 {
+    font-size: 15px;
+    color: #222;
+  }
+
+  .header .count {
+    margin-left: auto;
+    font-size: 12px;
+    color: #999;
+  }
+
+  .window {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .reaction {
+    display: flex;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .reaction.fading {
+    animation: fadeOut 0.4s ease forwards;
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      max-height: 200px;
+    }
+    to {
+      opacity: 0;
+      max-height: 0;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #999;
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+
+  .bubble { flex: 1; }
+
+  .bubble .name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 2px;
+  }
+
+  .bubble .text {
+    font-size: 13px;
+    color: #222;
+    line-height: 1.45;
+    background: #f7f7f7;
+    padding: 8px 12px;
+    border-radius: 4px 12px 12px 12px;
+  }
+
+  .bubble .meta {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+    font-size: 10px;
+    color: #aaa;
+  }
+
+  .bubble .meta .likes {
+    color: #D10A10;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="feed">
+  <div class="header">
+    <span class="icon">💬</span>
+    <h2>Reacties op aanstelling Jaimi van Essen</h2>
+    <span class="count" id="counter">0 / 7</span>
+  </div>
+  <div class="window" id="window"></div>
+</div>
+
+<script>
+  const reactions = [
+    { name: "Jan", text: "Nul ervaring, nul verstand en nooit een echte baan gehad! Lachwekkend!", time: "2 min.", likes: 34 },
+    { name: "Henk", text: "Alweer zo'n onervaren zelfingenomen bureaucraat waarvan iedereen weet dat dit op drama uitloopt.", time: "3 min.", likes: 52 },
+    { name: "Peter", text: "Hoe kan hij nou bijdragen aan natuurherstel als hij daar helemaal geen verstand van heeft. Dat is hetzelfde als Hugo de Jonge die de prikken promootte.", time: "5 min.", likes: 41 },
+    { name: "Marieke", text: "Wat een vreselijke foto, iemand die zo lacht wantrouw ik meteen...", time: "6 min.", likes: 18 },
+    { name: "Willem", text: "Nou, deze mag van mij meteen weer weg. Wat een droeftoeter. Nooit iets gehoord, gezien en maar zwijgen. Onder welke steen komt deze vandaan.", time: "8 min.", likes: 67 },
+    { name: "Frank", text: "Is zijn CV al doorgelicht?", time: "10 min.", likes: 23 },
+    { name: "Gerard", text: "Op naar het wachtgeld 💰", time: "12 min.", likes: 89 }
+  ];
+
+  const container = document.getElementById('window');
+  const counter = document.getElementById('counter');
+  const total = reactions.length;
+  const MAX_VISIBLE = 2;
+  let shown = 0;
+
+  function createEl(r) {
+    const div = document.createElement('div');
+    div.className = 'reaction';
+    div.innerHTML = `
+      <div class="avatar">${r.name.charAt(0)}</div>
+      <div class="bubble">
+        <div class="name">${r.name}</div>
+        <div class="text">${r.text}</div>
+        <div class="meta">
+          <span>${r.time}</span>
+          <span class="likes">❤️ ${r.likes}</span>
+        </div>
+      </div>
+    `;
+    return div;
+  }
+
+  function showNext() {
+    if (shown >= total) return;
+
+    const children = container.querySelectorAll('.reaction:not(.fading)');
+
+    // Als er al 2 zichtbaar zijn: fade de oudste uit
+    if (children.length >= MAX_VISIBLE) {
+      const oldest = children[0];
+      oldest.classList.add('fading');
+      oldest.addEventListener('animationend', () => oldest.remove());
+    }
+
+    // Nieuwe reactie toevoegen
+    const el = createEl(reactions[shown]);
+    container.appendChild(el);
+    shown++;
+    counter.textContent = `${shown} / ${total}`;
+
+    if (shown < total) {
+      setTimeout(showNext, 2500);
+    }
+  }
+
+  setTimeout(showNext, 600);
+</script>
+
+</body>
+</html>
